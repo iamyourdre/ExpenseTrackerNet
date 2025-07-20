@@ -4,6 +4,7 @@ using ExpenseTrackerNetApp.ApiService.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -22,15 +23,39 @@ namespace ExpenseTrackerNet.Server.Services
             this._configuration = configuration;
         }
 
-        public Task<User?> RegisterAsync(UserDTO request)
+        public async Task<User?> RegisterAsync(UserDTO request)
         {
-            throw new NotImplementedException();
+            var validationResults = new List<ValidationResult>();
+            var validationContext = new ValidationContext(request);
+            bool isValid = Validator.TryValidateObject(request, validationContext, validationResults, true);
+
+            if (!isValid)
+            {
+                return await Task.FromResult<User?>(null);
+            }
+
+            if (_context.Users.Any(u => u.Username == request.Username))
+                return await Task.FromResult<User?>(null);
+
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Username = request.Username,
+                PasswordHash = new PasswordHasher<User>().HashPassword(null, request.Password),
+                RefreshToken = null,
+                RefreshTokenExpiryTime = null
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return await Task.FromResult<User?>(user);
         }
 
         public async Task<TokenResponseDTO?> LoginAsync(UserDTO request)
         {
             var user = _context.Users
                 .FirstOrDefault(u => u.Username == request.Username);
+            if (user == null)
+                return null;
             var passwordCheck = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password);
             if (passwordCheck == PasswordVerificationResult.Failed)
                 return null;
