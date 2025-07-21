@@ -72,7 +72,7 @@ namespace ExpenseTrackerNet.Server.Controllers
             }
             request.UserId = userId;
 
-            var result = await _transactionService.UpdateTransactionAsync(request);
+            var result = await _transactionService.UpdateTransactionAsync(userId, request);
             if (result == null)
             {
                 return BadRequest("Failed to update transaction.");
@@ -118,6 +118,26 @@ namespace ExpenseTrackerNet.Server.Controllers
                 return NotFound("No transactions found for this user.");
             }
             return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTransactionAsync(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest("Transaction Id is required.");
+            }
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                return Unauthorized("Session is missing or invalid.");
+            }
+            var result = await _transactionService.DeleteTransactionAsync(userId, id);
+            if (!result)
+            {
+                return NotFound("Transaction not found or could not be deleted.");
+            }
+            return Ok();
         }
     }
 }

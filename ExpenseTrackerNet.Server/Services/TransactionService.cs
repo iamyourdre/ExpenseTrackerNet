@@ -38,9 +38,9 @@ namespace ExpenseTrackerNet.Server.Services
             };
         }
 
-        public async Task<TransactionReadDTO?> UpdateTransactionAsync(TransactionUpdateDTO request)
+        public async Task<TransactionReadDTO?> UpdateTransactionAsync(Guid userId, TransactionUpdateDTO request)
         {
-            var transaction = await _context.Transactions.FindAsync(request.Id);
+            var transaction = await _context.Transactions.Where(t => t.Id == request.Id && t.UserId == userId).FirstOrDefaultAsync();
             if (transaction == null)
             {
                 return null;
@@ -90,6 +90,18 @@ namespace ExpenseTrackerNet.Server.Services
                 })
                 .ToListAsync();
             return transactions;
+        }
+
+        public async Task<bool> DeleteTransactionAsync(Guid userId, Guid id)
+        {
+            var transaction = await _context.Transactions.Where(t => t.Id == id && t.UserId == userId).FirstOrDefaultAsync();
+            if (transaction == null)
+            {
+                return false;
+            }
+            _context.Transactions.Remove(transaction);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
