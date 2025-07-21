@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36301.6 d17.14
+VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTrackerNet.Server", "ExpenseTrackerNet.Server\ExpenseTrackerNet.Server.csproj", "{BB80407C-30CB-4994-BB54-09C67DF0B343}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Server", "TestServer\Test.Server.csproj", "{2FD23AF0-E3F2-4114-A963-57B900B74C7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{BB80407C-30CB-4994-BB54-09C67DF0B343}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB80407C-30CB-4994-BB54-09C67DF0B343}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB80407C-30CB-4994-BB54-09C67DF0B343}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FD23AF0-E3F2-4114-A963-57B900B74C7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FD23AF0-E3F2-4114-A963-57B900B74C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FD23AF0-E3F2-4114-A963-57B900B74C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FD23AF0-E3F2-4114-A963-57B900B74C7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

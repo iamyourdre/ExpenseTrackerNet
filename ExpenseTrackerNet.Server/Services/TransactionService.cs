@@ -32,6 +32,7 @@ namespace ExpenseTrackerNet.Server.Services
             {
                 Id = transaction.Id,
                 UserId = transaction.UserId,
+                CategoryId = transaction.CategoryId,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
                 Date = transaction.Date
@@ -47,13 +48,13 @@ namespace ExpenseTrackerNet.Server.Services
             }
             transaction.Amount = request.Amount;
             transaction.Description = request.Description;
+            transaction.CategoryId = request.CategoryId;
             transaction.Date = request.Date;
             _context.Transactions.Update(transaction);
             await _context.SaveChangesAsync();
             return new TransactionReadDTO
             {
                 Id = transaction.Id,
-                UserId = transaction.UserId,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
                 Date = transaction.Date
@@ -67,12 +68,14 @@ namespace ExpenseTrackerNet.Server.Services
                 .Select(t => new TransactionReadDTO
                 {
                     Id = t.Id,
-                    UserId = t.UserId,
                     Amount = t.Amount,
+                    CategoryId = t.CategoryId,
                     Description = t.Description,
                     Date = t.Date
                 })
                 .FirstOrDefaultAsync();
+            if (transaction == null)
+                return null;
             return transaction;
         }
 
@@ -84,11 +87,14 @@ namespace ExpenseTrackerNet.Server.Services
                 {
                     Id = t.Id,
                     UserId = t.UserId,
+                    CategoryId = t.CategoryId,
                     Amount = t.Amount,
                     Description = t.Description,
                     Date = t.Date
                 })
                 .ToListAsync();
+            if (transactions == null)
+                return null;
             return transactions;
         }
 
