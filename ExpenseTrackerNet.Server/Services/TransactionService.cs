@@ -2,8 +2,6 @@
 using ExpenseTrackerNetApp.ApiService.Data;
 using ExpenseTrackerNetApp.ApiService.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 
 namespace ExpenseTrackerNet.Server.Services
 {
@@ -20,18 +18,6 @@ namespace ExpenseTrackerNet.Server.Services
 
         public async Task<TransactionReadDTO?> CreateTransactionAsync(TransactionWriteDTO request)
         {
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            bool isValid = Validator.TryValidateObject(request, validationContext, validationResults, true);
-
-            if (!isValid)
-            {
-                // Remove the usage of ModelState and replace it with validationResults
-                var errors = validationResults
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return null;
-            }
             var transaction = new Transaction
             {
                 Id = Guid.NewGuid(),
@@ -45,6 +31,7 @@ namespace ExpenseTrackerNet.Server.Services
             return new TransactionReadDTO
             {
                 Id = transaction.Id,
+                UserId = transaction.UserId,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
                 Date = transaction.Date
@@ -66,6 +53,7 @@ namespace ExpenseTrackerNet.Server.Services
             return new TransactionReadDTO
             {
                 Id = transaction.Id,
+                UserId = transaction.UserId,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
                 Date = transaction.Date

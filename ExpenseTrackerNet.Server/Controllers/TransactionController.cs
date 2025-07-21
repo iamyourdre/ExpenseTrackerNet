@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using ExpenseTrackerNet.Server.Models;
+﻿using ExpenseTrackerNet.Server.Models;
 using ExpenseTrackerNet.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,12 +25,22 @@ namespace ExpenseTrackerNet.Server.Controllers
             {
                 return BadRequest("Transaction data is required.");
             }
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(new { Errors = errors });
+            }
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
             {
                 return Unauthorized("Session is missing or invalid.");
             }
             request.UserId = userId;
+
             var result = await _transactionService.CreateTransactionAsync(request);
             if (result == null)
             {
@@ -47,12 +56,22 @@ namespace ExpenseTrackerNet.Server.Controllers
             {
                 return BadRequest("Transaction data with a valid Id is required.");
             }
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(new { Errors = errors });
+            }
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
             {
                 return Unauthorized("Session is missing or invalid.");
             }
             request.UserId = userId;
+
             var result = await _transactionService.UpdateTransactionAsync(request);
             if (result == null)
             {
@@ -85,7 +104,6 @@ namespace ExpenseTrackerNet.Server.Controllers
             return Ok(result);
         }
 
-        // GetUserTransactionAsync
         [HttpGet]
         public async Task<IActionResult> GetUserTransactionsAsync()
         {

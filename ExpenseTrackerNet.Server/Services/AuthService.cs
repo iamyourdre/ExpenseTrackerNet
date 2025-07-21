@@ -4,7 +4,6 @@ using ExpenseTrackerNetApp.ApiService.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -19,23 +18,15 @@ namespace ExpenseTrackerNet.Server.Services
 
         public AuthService(ExpenseTrackerDbContext context, IConfiguration configuration)
         {
-            this._context = context;
-            this._configuration = configuration;
+            _context = context;
+            _configuration = configuration;
         }
 
         public async Task<User?> RegisterAsync(UserDTO request)
         {
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            bool isValid = Validator.TryValidateObject(request, validationContext, validationResults, true);
-
-            if (!isValid)
-            {
-                return await Task.FromResult<User?>(null);
-            }
-
-            if (_context.Users.Any(u => u.Username == request.Username))
-                return await Task.FromResult<User?>(null);
+            // Username uniqueness check
+            if (await _context.Users.AnyAsync(u => u.Username == request.Username))
+                return null;
 
             var user = new User
             {
@@ -47,29 +38,38 @@ namespace ExpenseTrackerNet.Server.Services
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return await Task.FromResult<User?>(user);
+            return user;
         }
 
         public async Task<TokenResponseDTO?> LoginAsync(UserDTO request)
         {
-            var user = _context.Users
-                .FirstOrDefault(u => u.Username == request.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
             if (user == null)
                 return null;
+
             var passwordCheck = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password);
             if (passwordCheck == PasswordVerificationResult.Failed)
+                return null;
+
+            return await CreateTokenResponse(user);
+        }
+
+        public async Task<TokenResponseDTO?> RefreshTokenAsync(RefreshTokenRequestDTO request)
+        {
+            var user = await ValidateRefreshTokenAsync(request.RefreshToken);
+            if (user == null)
                 return null;
             return await CreateTokenResponse(user);
         }
 
         private async Task<TokenResponseDTO?> CreateTokenResponse(User user)
         {
-            var token = CreateToken(user);
+            var accessToken = CreateToken(user);
             var refreshToken = await GenerateAndSaveRefreshTokenAsync(user);
             return new TokenResponseDTO
             {
-                AccessToken = CreateToken(user),
-                RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
             };
         }
 
@@ -88,7 +88,7 @@ namespace ExpenseTrackerNet.Server.Services
                 issuer: _configuration["AppSettings:Issuer"],
                 audience: _configuration["AppSettings:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: creds
             );
 
@@ -109,27 +109,18 @@ namespace ExpenseTrackerNet.Server.Services
         {
             var refreshToken = GenerateRefreshToken();
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
             return refreshToken;
         }
 
-        public async Task<TokenResponseDTO?> RefreshTokenAsync(RefreshTokenRequestDTO request)
+        private async Task<User?> ValidateRefreshTokenAsync(string refreshToken)
         {
-            var user = await ValidateRefreshTokenAsync(request.UserId, request.RefreshToken);
-            if (user == null)
-                return null;
-            return await CreateTokenResponse(user);
-        }
-
-        private async Task<User?> ValidateRefreshTokenAsync(Guid userId, string refreshToken)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.RefreshToken == refreshToken);
-            if (user == null || user.RefreshTokenExpiryTime < DateTime.Now)
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+            if (user == null || user.RefreshTokenExpiryTime < DateTime.UtcNow)
                 return null;
             return user;
         }
-
     }
 }

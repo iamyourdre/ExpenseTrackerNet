@@ -17,24 +17,74 @@ namespace ExpenseTrackerNet.Server.Controllers
             _authService = authService;
         }
 
-        [HttpPost("register")]  
-        public async Task<ActionResult<User>> Register(UserDTO request)
-        { 
-            var user = await _authService.RegisterAsync(request);
-            if(user == null)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] UserDTO request)
+        {
+            if (request == null)
             {
-                return BadRequest("User registration failed.");
+                return BadRequest("Registration data is required.");
+            }
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(new { Errors = errors });
+            }
+
+            var user = await _authService.RegisterAsync(request);
+            if (user == null)
+            {
+                return BadRequest("User registration failed. Username may already exist or data is invalid.");
             }
             return Ok(user);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(UserDTO request)
+        public async Task<IActionResult> Login([FromBody] UserDTO request)
         {
+            if (request == null)
+            {
+                return BadRequest("Login data is required.");
+            }
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(new { Errors = errors });
+            }
+
             var tokenResponse = await _authService.LoginAsync(request);
             if (tokenResponse == null)
             {
                 return Unauthorized("Invalid username or password.");
+            }
+            return Ok(tokenResponse);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDTO request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Refresh token data is required.");
+            }
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(new { Errors = errors });
+            }
+
+            var tokenResponse = await _authService.RefreshTokenAsync(request);
+            if (tokenResponse == null)
+            {
+                return Unauthorized("Invalid or expired refresh token.");
             }
             return Ok(tokenResponse);
         }
@@ -48,7 +98,5 @@ namespace ExpenseTrackerNet.Server.Controllers
 
             return Unauthorized("❌ You are not authenticated");
         }
-
-
     }
 }
