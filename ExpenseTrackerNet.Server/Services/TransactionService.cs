@@ -2,6 +2,8 @@
 using ExpenseTrackerNetApp.ApiService.Data;
 using ExpenseTrackerNetApp.ApiService.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace ExpenseTrackerNet.Server.Services
 {
@@ -18,6 +20,18 @@ namespace ExpenseTrackerNet.Server.Services
 
         public async Task<TransactionReadDTO?> CreateTransactionAsync(TransactionWriteDTO request)
         {
+            var validationResults = new List<ValidationResult>();
+            var validationContext = new ValidationContext(request);
+            bool isValid = Validator.TryValidateObject(request, validationContext, validationResults, true);
+
+            if (!isValid)
+            {
+                // Remove the usage of ModelState and replace it with validationResults
+                var errors = validationResults
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return null;
+            }
             var transaction = new Transaction
             {
                 Id = Guid.NewGuid(),
@@ -37,6 +51,27 @@ namespace ExpenseTrackerNet.Server.Services
             };
         }
 
+        public async Task<TransactionReadDTO?> UpdateTransactionAsync(TransactionUpdateDTO request)
+        {
+            var transaction = await _context.Transactions.FindAsync(request.Id);
+            if (transaction == null)
+            {
+                return null;
+            }
+            transaction.Amount = request.Amount;
+            transaction.Description = request.Description;
+            transaction.Date = request.Date;
+            _context.Transactions.Update(transaction);
+            await _context.SaveChangesAsync();
+            return new TransactionReadDTO
+            {
+                Id = transaction.Id,
+                Amount = transaction.Amount,
+                Description = transaction.Description,
+                Date = transaction.Date
+            };
+        }
+
         public async Task<TransactionReadDTO?> GetTransactionByIdAsync(Guid id)
         {
             var transaction = await _context.Transactions
@@ -44,6 +79,7 @@ namespace ExpenseTrackerNet.Server.Services
                 .Select(t => new TransactionReadDTO
                 {
                     Id = t.Id,
+                    UserId = t.UserId,
                     Amount = t.Amount,
                     Description = t.Description,
                     Date = t.Date
@@ -59,6 +95,7 @@ namespace ExpenseTrackerNet.Server.Services
                 .Select(t => new TransactionReadDTO
                 {
                     Id = t.Id,
+                    UserId = t.UserId,
                     Amount = t.Amount,
                     Description = t.Description,
                     Date = t.Date
