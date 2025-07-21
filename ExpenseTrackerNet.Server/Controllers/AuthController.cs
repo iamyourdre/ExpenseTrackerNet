@@ -1,6 +1,7 @@
 ﻿using ExpenseTrackerNet.Server.Models;
 using ExpenseTrackerNet.Server.Services;
 using ExpenseTrackerNetApp.ApiService.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTrackerNet.Server.Controllers
@@ -37,6 +38,17 @@ namespace ExpenseTrackerNet.Server.Controllers
             }
             return Ok(tokenResponse);
         }
+
+        [Authorize]
+        [HttpGet("authenticated")]
+        public IActionResult AuthenticatedOnlyEndpoint()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+                return Ok("You are authenticated");
+
+            return Unauthorized("❌ You are not authenticated");
+        }
+
 
     }
 }
