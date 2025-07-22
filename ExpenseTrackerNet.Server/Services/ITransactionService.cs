@@ -1,4 +1,4 @@
-﻿using ExpenseTrackerNet.Server.Models;
+﻿using ExpenseTrackerNet.Shared.Models;
 
 namespace ExpenseTrackerNet.Server.Services
 {

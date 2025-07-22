@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ExpenseTrackerNet.Server\ExpenseTrackerNet.Server.csproj" />
+    <ProjectReference Include="..\ExpenseTrackerNet.Shared\ExpenseTrackerNet.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

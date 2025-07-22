@@ -1,5 +1,5 @@
 ﻿using ExpenseTrackerNet.Server.Entities;
-using ExpenseTrackerNet.Server.Models;
+using ExpenseTrackerNet.Shared.Models;
 using ExpenseTrackerNetApp.ApiService.Data;
 using Microsoft.EntityFrameworkCore;
 

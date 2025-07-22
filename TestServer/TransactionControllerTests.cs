@@ -1,5 +1,5 @@
 ﻿using ExpenseTrackerNet.Server.Controllers;
-using ExpenseTrackerNet.Server.Models;
+using ExpenseTrackerNet.Shared.Models;
 using ExpenseTrackerNet.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using Moq;

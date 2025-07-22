@@ -1,0 +1,46 @@
+﻿@page "/login"
+@inject NavigationManager Navigation
+@inject IAuthService AuthService
+@inject IJSRuntime JS
+
+@using ExpenseTrackerNet.Client.Services
+@using ExpenseTrackerNet.Shared.Models
+@using static ExpenseTrackerNet.Client.Shared.Toaster
+
+<Toaster @ref="toaster" />
+
+<PageTitle>Login</PageTitle>
+
+<div>
+    <h3>Login</h3>
+    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <InputText id="username" class="form-control" @bind-Value="loginModel.Username" />
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+        </div>
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private UserDTO loginModel = new();
+    private Toaster? toaster;
+
+    private async Task HandleLogin()
+    {
+        var success = await AuthService.LoginAsync(loginModel);
+
+        if (!success)
+        {
+            toaster?.ShowMessage(ToastType.Danger, "Invalid login");
+        }
+    }
+}

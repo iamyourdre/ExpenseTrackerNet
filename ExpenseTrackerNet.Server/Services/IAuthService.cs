@@ -1,4 +1,4 @@
-﻿using ExpenseTrackerNet.Server.Models;
+﻿using ExpenseTrackerNet.Shared.Models;
 using ExpenseTrackerNetApp.ApiService.Entities;
 
 namespace ExpenseTrackerNet.Server.Services

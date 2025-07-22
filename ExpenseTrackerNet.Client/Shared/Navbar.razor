@@ -1,0 +1,36 @@
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container py-2">
+        <NavLink class="navbar-brand m-0 h5 pe-2" href="#">
+            <i class="fa-solid fa-piggy-bank"></i>&nbsp; Expense Tracker
+        </NavLink>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                @foreach (var link in navLinks)
+                {
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@link.Url" Match="NavLinkMatch.All">@link.Text</NavLink>
+                    </li>
+                }
+            </ul>
+            <NavLink class="btn btn-light" href="/login">Login</NavLink>
+        </div>
+    </div>
+</nav>
+
+@code {
+
+    public List<NavLink> navLinks = new List<NavLink>
+    {
+        new NavLink { Text = "Dashboard", Url = "/" },
+        new NavLink { Text = "Transaction", Url = "/transaction" },
+        new NavLink { Text = "About", Url = "/about" }
+    };
+    public class NavLink
+    {
+        public string Text { get; set; }
+        public string Url { get; set; }
+    }
+}

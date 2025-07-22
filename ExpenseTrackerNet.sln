@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTrackerNet.Server", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Server", "TestServer\Test.Server.csproj", "{2FD23AF0-E3F2-4114-A963-57B900B74C7E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTrackerNet.Client", "ExpenseTrackerNet.Client\ExpenseTrackerNet.Client.csproj", "{8D7CA0E4-0281-40D2-8A7E-EC9372F9F069}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTrackerNet.Shared", "ExpenseTrackerNet.Shared\ExpenseTrackerNet.Shared.csproj", "{9A9F6A5F-2842-4A88-97E9-C352E287F43B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{2FD23AF0-E3F2-4114-A963-57B900B74C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FD23AF0-E3F2-4114-A963-57B900B74C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FD23AF0-E3F2-4114-A963-57B900B74C7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D7CA0E4-0281-40D2-8A7E-EC9372F9F069}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D7CA0E4-0281-40D2-8A7E-EC9372F9F069}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D7CA0E4-0281-40D2-8A7E-EC9372F9F069}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D7CA0E4-0281-40D2-8A7E-EC9372F9F069}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A9F6A5F-2842-4A88-97E9-C352E287F43B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A9F6A5F-2842-4A88-97E9-C352E287F43B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A9F6A5F-2842-4A88-97E9-C352E287F43B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A9F6A5F-2842-4A88-97E9-C352E287F43B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

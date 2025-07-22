@@ -1,7 +1,6 @@
-﻿using ExpenseTrackerNetApp.ApiService.Entities;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace ExpenseTrackerNet.Server.Models
+namespace ExpenseTrackerNet.Shared.Models
 {
     public class CategoryWriteDTO
     {

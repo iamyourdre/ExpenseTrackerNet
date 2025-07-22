@@ -1,4 +1,4 @@
-﻿using ExpenseTrackerNet.Server.Models;
+﻿using ExpenseTrackerNet.Shared.Models;
 using ExpenseTrackerNet.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

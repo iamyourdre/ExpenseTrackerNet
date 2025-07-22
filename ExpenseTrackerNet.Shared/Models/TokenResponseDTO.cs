@@ -1,4 +1,4 @@
-﻿namespace ExpenseTrackerNet.Server.Models
+﻿namespace ExpenseTrackerNet.Shared.Models
 {
     public class TokenResponseDTO
     {
