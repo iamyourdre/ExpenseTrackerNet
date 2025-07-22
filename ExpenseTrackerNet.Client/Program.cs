@@ -6,17 +6,17 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
-builder.Services.AddBootstrapBlazor();
+builder.Services.AddBlazorBootstrap();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("http://localhost:7116/")
+    BaseAddress = new Uri("https://localhost:7116/")
 });
 
 builder.Services.AddHttpClient("HttpClient", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:7116/");
+    client.BaseAddress = new Uri("https://localhost:7116/");
 });
 
 await builder.Build().RunAsync();

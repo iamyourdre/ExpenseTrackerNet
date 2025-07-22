@@ -2,12 +2,20 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.Net.Http.Json;
+using System.Net;
 
 namespace ExpenseTrackerNet.Client.Services;
 
+public class LoginResult
+{
+    public bool Success { get; set; }
+    public string? ErrorMessage { get; set; }
+    public HttpStatusCode StatusCode { get; set; }
+}
+
 public interface IAuthService
 {
-    Task<bool> LoginAsync(UserDTO loginModel);
+    Task<LoginResult> LoginAsync(UserDTO loginModel);
 }
 
 public class AuthService : IAuthService
@@ -23,20 +31,59 @@ public class AuthService : IAuthService
         _nav = nav;
     }
 
-    public async Task<bool> LoginAsync(UserDTO loginModel)
+    public async Task<LoginResult> LoginAsync(UserDTO loginModel)
     {
         var response = await _http.PostAsJsonAsync("api/auth/login", loginModel);
 
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new LoginResult
+            {
+                Success = false,
+                ErrorMessage = await response.Content.ReadAsStringAsync(),
+                StatusCode = response.StatusCode
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            return new LoginResult
+            {
+                Success = false,
+                ErrorMessage = error,
+                StatusCode = response.StatusCode
+            };
+        }
+
         if (!response.IsSuccessStatusCode)
-            return false;
+        {
+            return new LoginResult
+            {
+                Success = false,
+                ErrorMessage = "Unexpected error occurred.",
+                StatusCode = response.StatusCode
+            };
+        }
 
         var tokenResult = await response.Content.ReadFromJsonAsync<TokenResponseDTO>();
         if (tokenResult == null)
-            return false;
+        {
+            return new LoginResult
+            {
+                Success = false,
+                ErrorMessage = "Invalid response from server.",
+                StatusCode = response.StatusCode
+            };
+        }
 
         await _js.InvokeVoidAsync("localStorage.setItem", "accessToken", tokenResult.AccessToken);
         await _js.InvokeVoidAsync("sessionStorage.setItem", "refreshToken", tokenResult.RefreshToken);
         _nav.NavigateTo("/");
-        return true;
+        return new LoginResult
+        {
+            Success = true,
+            StatusCode = response.StatusCode
+        };
     }
 }

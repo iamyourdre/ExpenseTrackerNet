@@ -36,11 +36,15 @@
 
     private async Task HandleLogin()
     {
-        var success = await AuthService.LoginAsync(loginModel);
+        var result = await AuthService.LoginAsync(loginModel);
+        await JS.InvokeVoidAsync("console.log", "HandleLogin");
 
-        if (!success)
+        if (!result.Success)
         {
-            toaster?.ShowMessage(ToastType.Danger, "Invalid login");
+
+            await JS.InvokeVoidAsync("console.log", result);
+            toaster?.ShowMessage(ToastType.Danger, result.ErrorMessage ?? "Login failed.");
         }
+        await JS.InvokeVoidAsync("console.log", "NICEEE");
     }
 }
