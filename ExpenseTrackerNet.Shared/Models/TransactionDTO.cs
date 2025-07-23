@@ -52,5 +52,7 @@ namespace ExpenseTrackerNet.Shared.Models
         public string Description { get; set; } = string.Empty;
         public int Amount { get; set; }
         public DateTime Date { get; set; }
+        public string? CategoryName { get; set; }
+        public string? CategoryIcon { get; set; }
     }
 }

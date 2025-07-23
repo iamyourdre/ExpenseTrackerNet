@@ -32,11 +32,11 @@ namespace ExpenseTrackerNet.Server.Services
             return new TransactionReadDTO
             {
                 Id = transaction.Id,
-                UserId = transaction.UserId,
-                CategoryId = transaction.CategoryId,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
-                Date = transaction.Date
+                Date = transaction.Date,
+                CategoryName = transaction.Category != null ? transaction.Category.Name : null,
+                CategoryIcon = transaction.Category != null ? transaction.Category.Icon : null
             };
         }
 
@@ -58,7 +58,9 @@ namespace ExpenseTrackerNet.Server.Services
                 Id = transaction.Id,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
-                Date = transaction.Date
+                Date = transaction.Date,
+                CategoryName = transaction.Category != null ? transaction.Category.Name : null,
+                CategoryIcon = transaction.Category != null ? transaction.Category.Icon : null
             };
         }
 
@@ -69,10 +71,12 @@ namespace ExpenseTrackerNet.Server.Services
                 .Select(t => new TransactionReadDTO
                 {
                     Id = t.Id,
+                    UserId = t.UserId,
                     Amount = t.Amount,
-                    CategoryId = t.CategoryId,
                     Description = t.Description,
-                    Date = t.Date
+                    Date = t.Date,
+                    CategoryName = t.Category != null ? t.Category.Name : null,
+                    CategoryIcon = t.Category != null ? t.Category.Icon : null
                 })
                 .FirstOrDefaultAsync();
             if (transaction == null)
@@ -84,14 +88,15 @@ namespace ExpenseTrackerNet.Server.Services
         {
             var transactions = await _context.Transactions
                 .Where(t => t.UserId == userId)
+                .Include(t => t.Category) // Ensure Category is loaded
                 .Select(t => new TransactionReadDTO
                 {
                     Id = t.Id,
-                    UserId = t.UserId,
-                    CategoryId = t.CategoryId,
                     Amount = t.Amount,
                     Description = t.Description,
-                    Date = t.Date
+                    Date = t.Date,
+                    CategoryName = t.Category != null ? t.Category.Name : null,
+                    CategoryIcon = t.Category != null ? t.Category.Icon : null
                 })
                 .ToListAsync();
             if (transactions == null)
