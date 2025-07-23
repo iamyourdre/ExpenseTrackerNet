@@ -1,7 +1,7 @@
 using ExpenseTrackerNet.Client.Services;
 using Microsoft.AspNetCore.Components;
 
-public class AuthGuardComponent : ComponentBase
+public class AuthGuardHeader : ComponentBase
 {
     [Inject] protected IAuthService AuthService { get; set; }
     [Inject] protected NavigationManager NavigationManager { get; set; }

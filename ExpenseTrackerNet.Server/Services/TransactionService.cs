@@ -22,6 +22,7 @@ namespace ExpenseTrackerNet.Server.Services
             {
                 Id = Guid.NewGuid(),
                 UserId = request.UserId,
+                CategoryId = request.CategoryId,
                 Amount = request.Amount,
                 Description = request.Description,
                 Date = request.Date
