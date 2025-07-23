@@ -7,10 +7,10 @@
 @using ExpenseTrackerNet.Shared.Models
 @using static ExpenseTrackerNet.Client.Shared.Toaster
 
-<Toaster @ref="toaster" />
 
 <PageTitle>Login</PageTitle>
 
+<Toaster @ref="toaster" />
 <div>
     <h3>Login</h3>
     <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
@@ -25,7 +25,19 @@
             <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
         </div>
         <div class="mb-3">
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-primary" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <div>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Logging in...
+                    </div>
+                }
+                else
+                {
+                    <text>Login</text>
+                }
+            </button>
         </div>
     </EditForm>
 </div>
@@ -33,18 +45,21 @@
 @code {
     private UserDTO loginModel = new();
     private Toaster? toaster;
+    private bool isLoading = false;
 
     private async Task HandleLogin()
     {
+        isLoading = true;
+        StateHasChanged();
+
         var result = await AuthService.LoginAsync(loginModel);
-        await JS.InvokeVoidAsync("console.log", "HandleLogin");
 
         if (!result.Success)
         {
-
-            await JS.InvokeVoidAsync("console.log", result);
             toaster?.ShowMessage(ToastType.Danger, result.ErrorMessage ?? "Login failed.");
         }
-        await JS.InvokeVoidAsync("console.log", "NICEEE");
+
+        isLoading = false;
+        StateHasChanged();
     }
 }

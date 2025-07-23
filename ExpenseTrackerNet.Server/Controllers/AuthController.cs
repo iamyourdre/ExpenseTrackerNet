@@ -96,7 +96,7 @@ namespace ExpenseTrackerNet.Server.Controllers
             if (User.Identity?.IsAuthenticated == true)
                 return Ok("You are authenticated");
 
-            return Unauthorized("❌ You are not authenticated");
+            return Unauthorized("You are not authenticated");
         }
     }
 }

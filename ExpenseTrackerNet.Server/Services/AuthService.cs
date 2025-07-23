@@ -88,7 +88,7 @@ namespace ExpenseTrackerNet.Server.Services
                 issuer: _configuration["AppSettings:Issuer"],
                 audience: _configuration["AppSettings:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddMinutes(2),
                 signingCredentials: creds
             );
 
