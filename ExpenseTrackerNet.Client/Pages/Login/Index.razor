@@ -1,6 +1,6 @@
 ﻿@page "/login"
 @inject NavigationManager Navigation
-@inject IAuthService AuthService
+@inject ILoginService LoginService
 @inject IJSRuntime JS
 
 @using ExpenseTrackerNet.Client.Services
@@ -13,9 +13,9 @@
 <Toaster @ref="toaster" />
 <div>
     <h3>Login</h3>
-    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin" OnInvalidSubmit="HandleInvalidLogin">
         <DataAnnotationsValidator />
-        <ValidationSummary />
+        @* <ValidationSummary /> *@
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <InputText id="username" class="form-control" @bind-Value="loginModel.Username" />
@@ -24,6 +24,11 @@
             <label for="password" class="form-label">Password</label>
             <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
         </div>
+        <div class="mb-3">
+            <p>
+				Don't have an account? <a href="/register">Register here</a>.
+            </p>
+		</div>
         <div class="mb-3">
             <button type="submit" class="btn btn-primary" disabled="@isLoading">
                 @if (isLoading)
@@ -43,23 +48,31 @@
 </div>
 
 @code {
-    private UserDTO loginModel = new();
-    private Toaster? toaster;
-    private bool isLoading = false;
+	private UserDTO loginModel = new();
+	private Toaster? toaster;
+	private bool isLoading = false;
 
-    private async Task HandleLogin()
+	private async Task HandleLogin()
+	{
+		isLoading = true;
+		StateHasChanged();
+
+		var result = await LoginService.LoginAsync(loginModel);
+
+		if (!result.Success)
+		{
+			toaster?.ShowMessage(ToastType.Danger, result.ErrorMessage ?? "Login failed.");
+		}
+
+		isLoading = false;
+		StateHasChanged();
+	}
+	private void HandleInvalidLogin(EditContext editContext)
     {
-        isLoading = true;
-        StateHasChanged();
-
-        var result = await AuthService.LoginAsync(loginModel);
-
-        if (!result.Success)
+        var messages = editContext.GetValidationMessages();
+        foreach (var message in messages)
         {
-            toaster?.ShowMessage(ToastType.Danger, result.ErrorMessage ?? "Login failed.");
+            toaster?.ShowMessage(ToastType.Danger, message);
         }
-
-        isLoading = false;
-        StateHasChanged();
     }
 }
