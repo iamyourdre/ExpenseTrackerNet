@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExpenseTrackerNet.Server.Migrations
 {
     [DbContext(typeof(ExpenseTrackerDbContext))]
-    [Migration("20250721143503_Initial")]
+    [Migration("20250723103243_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,30 +25,6 @@ namespace ExpenseTrackerNet.Server.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ExpenseTrackerNet.Server.Entities.Category", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Icon")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Categories");
-                });
-
             modelBuilder.Entity("ExpenseTrackerNetApp.ApiService.Entities.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -58,8 +34,8 @@ namespace ExpenseTrackerNet.Server.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
@@ -72,8 +48,6 @@ namespace ExpenseTrackerNet.Server.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
 
@@ -105,40 +79,19 @@ namespace ExpenseTrackerNet.Server.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ExpenseTrackerNet.Server.Entities.Category", b =>
-                {
-                    b.HasOne("ExpenseTrackerNetApp.ApiService.Entities.User", "User")
-                        .WithMany("Categories")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ExpenseTrackerNetApp.ApiService.Entities.Transaction", b =>
                 {
-                    b.HasOne("ExpenseTrackerNet.Server.Entities.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("ExpenseTrackerNetApp.ApiService.Entities.User", "User")
                         .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Category");
-
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("ExpenseTrackerNetApp.ApiService.Entities.User", b =>
                 {
-                    b.Navigation("Categories");
-
                     b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618

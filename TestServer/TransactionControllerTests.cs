@@ -41,8 +41,8 @@ public class TransactionControllerTests
     [Fact]
     public async Task CreateTransactionAsync_ReturnsOk_WhenCreated()
     {
-        var dto = new TransactionWriteDTO { UserId = _userId, Description = "desc", CategoryId = Guid.NewGuid(), Amount = 10, Date = DateTime.Now };
-        var readDto = new TransactionReadDTO { Id = Guid.NewGuid(), UserId = _userId, Description = "desc", CategoryId = dto.CategoryId, Amount = 10, Date = dto.Date };
+        var dto = new TransactionWriteDTO { UserId = _userId, Description = "desc", Category = "cat", Amount = 10, Date = DateTime.Now };
+        var readDto = new TransactionReadDTO { Id = Guid.NewGuid(), UserId = _userId, Description = "desc", Category = dto.Category, Amount = 10, Date = dto.Date };
         _serviceMock.Setup(s => s.CreateTransactionAsync(It.IsAny<TransactionWriteDTO>())).ReturnsAsync(readDto);
 
         var result = await _controller.CreateTransactionAsync(dto);
@@ -53,7 +53,7 @@ public class TransactionControllerTests
     [Fact]
     public async Task UpdateTransactionAsync_ReturnsBadRequest_WhenUpdateFails()
     {
-        var dto = new TransactionUpdateDTO { Id = Guid.NewGuid(), UserId = _userId, Description = "desc", CategoryId = Guid.NewGuid(), Amount = 10, Date = DateTime.Now };
+        var dto = new TransactionUpdateDTO { Id = Guid.NewGuid(), UserId = _userId, Description = "desc", Category = "cat", Amount = 10, Date = DateTime.Now };
         _serviceMock.Setup(s => s.UpdateTransactionAsync(_userId, dto)).ReturnsAsync((TransactionReadDTO)null);
 
         var result = await _controller.UpdateTransactionAsync(dto);
@@ -72,7 +72,7 @@ public class TransactionControllerTests
     [Fact]
     public async Task GetUserTransactionsAsync_ReturnsOk_WhenFound()
     {
-        var list = new List<TransactionReadDTO> { new TransactionReadDTO { Id = Guid.NewGuid(), UserId = _userId, Description = "desc", CategoryId = Guid.NewGuid(), Amount = 10, Date = DateTime.Now } };
+        var list = new List<TransactionReadDTO> { new TransactionReadDTO { Id = Guid.NewGuid(), UserId = _userId, Description = "desc", Category = "cat", Amount = 10, Date = DateTime.Now } };
         _serviceMock.Setup(s => s.GetUserTransactionAsync(_userId)).ReturnsAsync(list);
 
         var result = await _controller.GetUserTransactionsAsync();

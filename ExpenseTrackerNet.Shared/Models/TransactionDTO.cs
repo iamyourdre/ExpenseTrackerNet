@@ -11,8 +11,7 @@ namespace ExpenseTrackerNet.Shared.Models
         [StringLength(100, ErrorMessage = "Description cannot be longer than 100 characters")]
         public string Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Category Id is required")]
-        public Guid CategoryId { get; set; } = Guid.Empty;
+        public string? Category { get; set; }
 
         [Required(ErrorMessage = "Amount is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Amount must be greater than 0")]
@@ -34,8 +33,7 @@ namespace ExpenseTrackerNet.Shared.Models
         [StringLength(100, ErrorMessage = "Description cannot be longer than 100 characters")]
         public string Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Category Id is required")]
-        public Guid CategoryId { get; set; } = Guid.Empty;
+        public string? Category { get; set; }
 
         [Required(ErrorMessage = "Amount is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Amount must be greater than 0")]
@@ -48,11 +46,9 @@ namespace ExpenseTrackerNet.Shared.Models
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-        public Guid CategoryId { get; set; }
+        public string? Category { get; set; }
         public string Description { get; set; } = string.Empty;
         public int Amount { get; set; }
         public DateTime Date { get; set; }
-        public string? CategoryName { get; set; }
-        public string? CategoryIcon { get; set; }
     }
 }

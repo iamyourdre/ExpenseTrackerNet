@@ -1,5 +1,4 @@
-﻿using ExpenseTrackerNet.Server.Entities;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ExpenseTrackerNetApp.ApiService.Entities
 {
@@ -11,6 +10,5 @@ namespace ExpenseTrackerNetApp.ApiService.Entities
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
         public ICollection<Transaction> Transactions { get; set; } = [];
-        public ICollection<Category> Categories { get; set; } = [];
     }
 }

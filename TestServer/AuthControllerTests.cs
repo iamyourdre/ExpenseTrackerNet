@@ -65,7 +65,7 @@ public class AuthControllerTests
     [Fact]
     public async Task RefreshToken_ReturnsUnauthorized_WhenRefreshFails()
     {
-        var refreshDto = new RefreshTokenRequestDTO { UserId = System.Guid.NewGuid(), RefreshToken = "badtoken" };
+        var refreshDto = new RefreshTokenRequestDTO { RefreshToken = "badtoken" };
         _authServiceMock.Setup(s => s.RefreshTokenAsync(refreshDto)).ReturnsAsync((TokenResponseDTO)null);
 
         var result = await _controller.RefreshToken(refreshDto);
@@ -76,7 +76,7 @@ public class AuthControllerTests
     [Fact]
     public async Task RefreshToken_ReturnsOk_WhenRefreshSucceeds()
     {
-        var refreshDto = new RefreshTokenRequestDTO { UserId = System.Guid.NewGuid(), RefreshToken = "goodtoken" };
+        var refreshDto = new RefreshTokenRequestDTO { RefreshToken = "goodtoken" };
         var tokenResponse = new TokenResponseDTO { AccessToken = "token", RefreshToken = "refresh" };
         _authServiceMock.Setup(s => s.RefreshTokenAsync(refreshDto)).ReturnsAsync(tokenResponse);
 

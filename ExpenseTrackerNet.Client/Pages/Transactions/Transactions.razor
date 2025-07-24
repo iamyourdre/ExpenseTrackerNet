@@ -1,9 +1,100 @@
-﻿<h3>Transactions</h3>
+﻿@page "/transactions"  
+@using ExpenseTrackerNet.Client.Services
+@using ExpenseTrackerNet.Shared.Models  
+@using System.Text.Json
+@inherits AuthGuardHeader  
+@inject HttpClient Http  
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage  
+@inject ITransactionService TransactionService
 
-<div>
-	
+<div class="d-flex justify-content-between mb-4">
+    <h3>Transactions</h3>
+    <AddTrxFormModal />
 </div>
 
-@code {
 
+<div class="table-responsive">  
+    <table class="table table-striped table-bordered align-middle">  
+        <thead class="table-light">  
+            <tr>  
+                <th>Category</th>  
+                <th>Description</th>  
+                <th>Amount</th>  
+                <th>Date</th>  
+            </tr>  
+        </thead>  
+        <tbody>  
+            @if (transactions != null && transactions.Any() && !isLoading)  
+            {  
+                foreach (var t in transactions)  
+                {  
+                    <tr>  
+                        <td>
+                            @{
+                                var iconClass = categories?.FirstOrDefault(c => c.Name == t.Category)?.Icon;
+                            }
+                            <i class="@(string.IsNullOrEmpty(iconClass) ? "fas fa-ellipsis-h" : iconClass)" style="width:25px; display:inline-block; text-align:center;"></i>
+                            @t.Category
+                        </td>
+                        <td>@t.Description</td>  
+                        <td>@t.Amount</td>  
+                        <td>@t.Date.ToShortDateString()</td>
+                    </tr>  
+                }  
+            }  
+            else if (isLoading)  
+            {  
+                <tr>  
+                    <td colspan="5" class="text-center">  
+                        <div class="spinner-border" role="status">  
+                            <span class="visually-hidden">Loading...</span>  
+                        </div>  
+                    </td>  
+                </tr>
+			}
+			else
+            {  
+                <tr>  
+                    <td colspan="5" class="text-center">No transactions found.</td>  
+                </tr>  
+            }  
+        </tbody>  
+    </table>  
+</div>  
+
+@code {
+    private List<TransactionReadDTO>? transactions;  
+    private List<Category>? categories;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {  
+        try
+        {
+            // Load transactions
+            transactions = await TransactionService.GetUserTransactionsAsync();
+
+            // Load categories from JSON
+            var json = await Http.GetStringAsync("data/Categories.json");
+            using var doc = JsonDocument.Parse(json);
+            categories = doc.RootElement.GetProperty("Categories")
+                .EnumerateArray()
+                .Select(e => new Category
+                {
+                    Name = e.GetProperty("Name").GetString(),
+                    Icon = e.GetProperty("Icon").GetString()
+                })
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }  
 }
+

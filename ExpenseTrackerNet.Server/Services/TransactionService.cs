@@ -22,7 +22,7 @@ namespace ExpenseTrackerNet.Server.Services
             {
                 Id = Guid.NewGuid(),
                 UserId = request.UserId,
-                CategoryId = request.CategoryId,
+                Category = request.Category ?? "Other",
                 Amount = request.Amount,
                 Description = request.Description,
                 Date = request.Date
@@ -32,11 +32,10 @@ namespace ExpenseTrackerNet.Server.Services
             return new TransactionReadDTO
             {
                 Id = transaction.Id,
+                Category = transaction.Category,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
-                Date = transaction.Date,
-                CategoryName = transaction.Category != null ? transaction.Category.Name : null,
-                CategoryIcon = transaction.Category != null ? transaction.Category.Icon : null
+                Date = transaction.Date
             };
         }
 
@@ -49,18 +48,17 @@ namespace ExpenseTrackerNet.Server.Services
             }
             transaction.Amount = request.Amount;
             transaction.Description = request.Description;
-            transaction.CategoryId = request.CategoryId;
+            transaction.Category = request.Category ?? "Other";
             transaction.Date = request.Date;
             _context.Transactions.Update(transaction);
             await _context.SaveChangesAsync();
             return new TransactionReadDTO
             {
                 Id = transaction.Id,
+                Category = transaction.Category,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
-                Date = transaction.Date,
-                CategoryName = transaction.Category != null ? transaction.Category.Name : null,
-                CategoryIcon = transaction.Category != null ? transaction.Category.Icon : null
+                Date = transaction.Date
             };
         }
 
@@ -72,11 +70,10 @@ namespace ExpenseTrackerNet.Server.Services
                 {
                     Id = t.Id,
                     UserId = t.UserId,
+                    Category = t.Category,
                     Amount = t.Amount,
                     Description = t.Description,
                     Date = t.Date,
-                    CategoryName = t.Category != null ? t.Category.Name : null,
-                    CategoryIcon = t.Category != null ? t.Category.Icon : null
                 })
                 .FirstOrDefaultAsync();
             if (transaction == null)
@@ -88,15 +85,13 @@ namespace ExpenseTrackerNet.Server.Services
         {
             var transactions = await _context.Transactions
                 .Where(t => t.UserId == userId)
-                .Include(t => t.Category) // Ensure Category is loaded
                 .Select(t => new TransactionReadDTO
                 {
                     Id = t.Id,
+                    Category = t.Category,
                     Amount = t.Amount,
                     Description = t.Description,
-                    Date = t.Date,
-                    CategoryName = t.Category != null ? t.Category.Name : null,
-                    CategoryIcon = t.Category != null ? t.Category.Icon : null
+                    Date = t.Date
                 })
                 .ToListAsync();
             if (transactions == null)

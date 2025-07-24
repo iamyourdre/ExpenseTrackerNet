@@ -1,0 +1,62 @@
+{
+  "Outcome": [
+    {
+      "Name": "Food",
+      "Icon": "fas fa-utensils"
+    },
+    {
+      "Name": "Transport",
+      "Icon": "fas fa-car"
+    },
+    {
+      "Name": "Entertainment",
+      "Icon": "fas fa-film"
+    },
+    {
+      "Name": "Health",
+      "Icon": "fas fa-heart"
+    },
+    {
+      "Name": "Utilities",
+      "Icon": "fas fa-lightbulb"
+    },
+    {
+      "Name": "Shopping",
+      "Icon": "fas fa-shopping-cart"
+    },
+    {
+      "Name": "Travel",
+      "Icon": "fas fa-plane"
+    },
+    {
+      "Name": "Education",
+      "Icon": "fas fa-graduation-cap"
+    },
+    {
+      "Name": "Other",
+      "Icon": "fas fa-ellipsis-h"
+    }
+  ],
+  "Income": [
+    {
+      "Name": "Salary",
+      "Icon": "fas fa-money-bill-wave"
+    },
+    {
+      "Name": "Investment",
+      "Icon": "fas fa-chart-line"
+    },
+    {
+      "Name": "Freelance",
+      "Icon": "fas fa-briefcase"
+    },
+    {
+      "Name": "Gift",
+      "Icon": "fas fa-gift"
+    },
+    {
+      "Name": "Other",
+      "Icon": "fas fa-ellipsis-h"
+    }
+  ]
+}
