@@ -5,15 +5,15 @@
 @inject HttpClient Http
 
 <Toaster @ref="toaster" />
-<Modal @ref="addtrx" Title="Add Transaction">  
+<Modal @ref="updatetrx" Title="Add Transaction">  
     <BodyTemplate>  
         <EditForm Model="trxModel" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit">
             <DataAnnotationsValidator />
             <div class="mb-3">
                 <label class="form-label">Type</label>
                 <InputSelect class="form-select" @bind-Value="SelectedType">
-                    <option value="Income">Income</option>
                     <option value="Outcome">Outcome</option>
+                    <option value="Income">Income</option>
                 </InputSelect>
             </div>
             <div class="mb-3">
@@ -76,28 +76,31 @@
 </Button>  
 
 @code {
-    private Modal addtrx;  
+    [Parameter]
+    public EventCallback<TransactionReadDTO> OnTransactionAdded { get; set; }
+
+    private Modal updatetrx;  
     private TransactionWriteDTO trxModel = new();
     private List<Category> incomeCategories = new();
     private List<Category> outcomeCategories = new();
     private List<Category> filteredCategories = new();
-    private string selectedType = "Income";
     private Toaster? toaster;  
+	private string selectedType = "Outcome";
     private bool isLoading = false;
     private TimeOnly? time;
 
     private async Task OnShowModalClick()  
     {  
-        await addtrx?.ShowAsync();
+        await updatetrx?.ShowAsync();
         time = TimeOnly.FromDateTime(DateTime.Now);
-        selectedType = "Income";
-        filteredCategories = incomeCategories;
+        selectedType = "Outcome";
+        filteredCategories = outcomeCategories;
         trxModel.Category = null;
     }  
 
     private async Task OnHideModalClick()  
     {  
-        await addtrx?.HideAsync();  
+        await updatetrx?.HideAsync();  
     }  
 
     private async Task HandleSubmit()
@@ -113,17 +116,19 @@
                 .AddSeconds(time.Value.Second);
         }
 
+        trxModel.Type = selectedType;
         var result = await TransactionService.CreateTransactionAsync(trxModel);
 
-        if (result == null)
+        if (result != null)
         {
-            toaster?.ShowMessage(ToastType.Danger, "Unable to add transaction. Please try again.");
+            await OnTransactionAdded.InvokeAsync(result);
+            toaster.ShowMessage(ToastType.Success, "Transaction added successfully.");
+			trxModel = new TransactionWriteDTO();
+            await updatetrx?.HideAsync();
         }
         else
         {
-            toaster.ShowMessage(ToastType.Success, "Transaction added successfully.");
-            Console.WriteLine(JsonSerializer.Serialize(result));
-            await addtrx?.HideAsync();
+            toaster?.ShowMessage(ToastType.Danger, "Unable to add transaction. Please try again.");
         }
         isLoading = false;
         StateHasChanged();
@@ -139,7 +144,7 @@
         var json = await Http.GetStringAsync("data/Categories.json");
         var doc = JsonDocument.Parse(json);
 
-        incomeCategories = doc.RootElement.GetProperty("Income")
+        outcomeCategories = doc.RootElement.GetProperty("Outcome")
             .EnumerateArray()
             .Select(e => new Category
             {
@@ -148,7 +153,7 @@
             })
             .ToList();
 
-        outcomeCategories = doc.RootElement.GetProperty("Outcome")
+        incomeCategories = doc.RootElement.GetProperty("Income")
             .EnumerateArray()
             .Select(e => new Category
             {
@@ -167,8 +172,8 @@
             {
                 selectedType = value;
                 trxModel.Category = null;
-                filteredCategories = selectedType == "Income" ? incomeCategories
-                                    : selectedType == "Outcome" ? outcomeCategories
+                filteredCategories = selectedType == "Outcome" ? outcomeCategories
+                                    : selectedType == "Income" ? incomeCategories
                                     : new List<Category>();
                 StateHasChanged();
             }

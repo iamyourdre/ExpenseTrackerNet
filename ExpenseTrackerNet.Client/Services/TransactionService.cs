@@ -10,6 +10,9 @@ public interface ITransactionService
 {
     Task<List<TransactionReadDTO>?> GetUserTransactionsAsync();
     Task<TransactionReadDTO> CreateTransactionAsync(TransactionWriteDTO transaction);
+    Task<TransactionReadDTO> UpdateTransactionAsync(TransactionUpdateDTO transaction);
+    Task<TransactionReadDTO?> GetTransactionByIdAsync(string id);
+    Task<bool> DeleteTransactionAsync(string id);
 }
 
 public class TransactionService : BaseService, ITransactionService
@@ -53,5 +56,52 @@ public class TransactionService : BaseService, ITransactionService
 
         var createdTransaction = await response.Content.ReadFromJsonAsync<TransactionReadDTO>();
         return createdTransaction;
+    }
+
+    public async Task<TransactionReadDTO?> GetTransactionByIdAsync(string id)
+    {
+        var accessToken = await _js.InvokeAsync<string>("localStorage.getItem", "accessToken");
+        if (string.IsNullOrWhiteSpace(accessToken))
+            return null;
+        _http.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        var response = await _http.GetAsync($"api/Transaction/{id}");
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            return null;
+        if (!response.IsSuccessStatusCode)
+            return null;
+        var transaction = await response.Content.ReadFromJsonAsync<TransactionReadDTO>();
+        return transaction;
+    }
+
+    public async Task<TransactionReadDTO?> UpdateTransactionAsync(TransactionUpdateDTO transaction)
+    {
+        var accessToken = await _js.InvokeAsync<string>("localStorage.getItem", "accessToken");
+        if (string.IsNullOrWhiteSpace(accessToken))
+            return null;
+        _http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        var response = await _http.PatchAsJsonAsync("api/Transaction/update", transaction);
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            return null;
+        if (!response.IsSuccessStatusCode)
+            return null;
+        var updatedTransaction = await response.Content.ReadFromJsonAsync<TransactionReadDTO>();
+        return updatedTransaction;
+    }
+
+    public async Task<bool> DeleteTransactionAsync(string id)
+    {
+        var accessToken = await _js.InvokeAsync<string>("localStorage.getItem", "accessToken");
+        if (string.IsNullOrWhiteSpace(accessToken))
+            return false;
+        _http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        var response = await _http.DeleteAsync($"api/Transaction/{id}");
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            return false;
+        if (!response.IsSuccessStatusCode)
+            return false;
+        return true;
     }
 }

@@ -7,9 +7,10 @@
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage  
 @inject ITransactionService TransactionService
 
+<Toaster @ref="toaster" />
 <div class="d-flex justify-content-between mb-4">
     <h3>Transactions</h3>
-    <AddTrxFormModal />
+    <AddTrxFormModal OnTransactionAdded="HandleTransactionAdded" />
 </div>
 
 
@@ -20,7 +21,8 @@
                 <th>Category</th>  
                 <th>Description</th>  
                 <th>Amount</th>  
-                <th>Date</th>  
+                <th>Date</th>
+				<th>Actions</th>
             </tr>  
         </thead>  
         <tbody>  
@@ -30,15 +32,30 @@
                 {  
                     <tr>  
                         <td>
-                            @{
-                                var iconClass = categories?.FirstOrDefault(c => c.Name == t.Category)?.Icon;
-                            }
-                            <i class="@(string.IsNullOrEmpty(iconClass) ? "fas fa-ellipsis-h" : iconClass)" style="width:25px; display:inline-block; text-align:center;"></i>
+                            @{var iconClass = categories?.FirstOrDefault(c => c.Name == t.Category)?.Icon;}
+                            <span class="badge me-1 rounded-circle @(t.Type == "Outcome" ? "text-bg-danger" : "text-bg-success")" style="width: 32px; height: 32px; display:inline-block; text-align:center; line-height:25px;">
+                                <i class="@(string.IsNullOrEmpty(iconClass) ? "fas fa-ellipsis-h" : iconClass)"></i>
+                            </span>
                             @t.Category
                         </td>
-                        <td>@t.Description</td>  
-                        <td>@t.Amount</td>  
-                        <td>@t.Date.ToShortDateString()</td>
+                        <td>@t.Description</td>
+                        <td class="@(t.Type == "Outcome" ? "text-danger" : "text-success")">
+                            <b>
+                                @(t.Type == "Outcome"
+                                    ? "-" + t.Amount.ToString("N0")
+                                    : t.Amount.ToString("N0")
+                                )
+                            </b>
+                        </td>
+                        <td>@t.Date.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <NavLink class="btn btn-sm btn-primary me-1" href="@($"/transactions/edit/{t.Id}")">
+						        <i class="fas fa-edit"></i>
+                            </NavLink>
+                            <button class="btn btn-sm btn-danger" @onclick="() => HandleDeleteTransaction(t.Id.ToString())">
+						        <i class="fas fa-trash"></i>
+					        </button>
+				        </td>
                     </tr>  
                 }  
             }  
@@ -66,6 +83,10 @@
     private List<TransactionReadDTO>? transactions;  
     private List<Category>? categories;
     private bool isLoading = true;
+    private Toaster? toaster;
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {  
@@ -77,8 +98,10 @@
             // Load categories from JSON
             var json = await Http.GetStringAsync("data/Categories.json");
             using var doc = JsonDocument.Parse(json);
-            categories = doc.RootElement.GetProperty("Categories")
+
+            categories = doc.RootElement.GetProperty("Income")
                 .EnumerateArray()
+                .Concat(doc.RootElement.GetProperty("Outcome").EnumerateArray())
                 .Select(e => new Category
                 {
                     Name = e.GetProperty("Name").GetString(),
@@ -88,7 +111,7 @@
         }
         catch (Exception ex)
         {
-            
+            // Handle error
         }
         finally
         {
@@ -96,5 +119,30 @@
             StateHasChanged();
         }
     }  
+
+    private void HandleTransactionAdded(TransactionReadDTO newTransaction)
+    {
+        transactions ??= new List<TransactionReadDTO>();
+        transactions.Insert(0, newTransaction); // Add to top of list
+        StateHasChanged();
+    }
+
+    private async Task HandleDeleteTransaction(string transactionId)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this transaction?"))
+        {
+            return;
+        }
+        if (await TransactionService.DeleteTransactionAsync(transactionId))
+        {
+            transactions?.RemoveAll(t => t.Id.ToString() == transactionId.ToString());
+            toaster?.ShowMessage(ToastType.Success, "Transaction deleted.");
+            StateHasChanged();
+        }
+        else
+        {
+            toaster?.ShowMessage(ToastType.Danger, "Failed to delete transaction. Please try again.");
+        }
+    }
 }
 

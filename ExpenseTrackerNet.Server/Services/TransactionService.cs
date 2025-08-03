@@ -23,6 +23,7 @@ namespace ExpenseTrackerNet.Server.Services
                 Id = Guid.NewGuid(),
                 UserId = request.UserId,
                 Category = request.Category ?? "Other",
+                Type = request.Type ?? "Income",
                 Amount = request.Amount,
                 Description = request.Description,
                 Date = request.Date
@@ -35,6 +36,7 @@ namespace ExpenseTrackerNet.Server.Services
                 Category = transaction.Category,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
+                Type = transaction.Type,
                 Date = transaction.Date
             };
         }
@@ -50,6 +52,7 @@ namespace ExpenseTrackerNet.Server.Services
             transaction.Description = request.Description;
             transaction.Category = request.Category ?? "Other";
             transaction.Date = request.Date;
+            transaction.Type = request.Type ?? "Income";
             _context.Transactions.Update(transaction);
             await _context.SaveChangesAsync();
             return new TransactionReadDTO
@@ -58,6 +61,7 @@ namespace ExpenseTrackerNet.Server.Services
                 Category = transaction.Category,
                 Amount = transaction.Amount,
                 Description = transaction.Description,
+                Type = transaction.Type,
                 Date = transaction.Date
             };
         }
@@ -73,6 +77,7 @@ namespace ExpenseTrackerNet.Server.Services
                     Category = t.Category,
                     Amount = t.Amount,
                     Description = t.Description,
+                    Type = t.Type,
                     Date = t.Date,
                 })
                 .FirstOrDefaultAsync();
@@ -91,6 +96,7 @@ namespace ExpenseTrackerNet.Server.Services
                     Category = t.Category,
                     Amount = t.Amount,
                     Description = t.Description,
+                    Type = t.Type,
                     Date = t.Date
                 })
                 .ToListAsync();

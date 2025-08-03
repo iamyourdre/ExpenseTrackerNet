@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExpenseTrackerNet.Server.Migrations
 {
     [DbContext(typeof(ExpenseTrackerDbContext))]
-    [Migration("20250723103243_Initial")]
-    partial class Initial
+    [Migration("20250724051627_AddCategoryType")]
+    partial class AddCategoryType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,6 +41,10 @@ namespace ExpenseTrackerNet.Server.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

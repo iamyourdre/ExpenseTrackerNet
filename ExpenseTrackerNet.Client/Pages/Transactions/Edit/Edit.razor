@@ -1,0 +1,208 @@
+﻿@page "/transactions/edit/{Id}"
+@using ExpenseTrackerNet.Client.Services
+@using ExpenseTrackerNet.Shared.Models
+@using System.Text.Json
+@inject ITransactionService TransactionService
+@inject NavigationManager Navigation
+@inject HttpClient Http
+
+<Toaster @ref="toaster" />
+
+<div class="d-flex justify-content-between mb-4">
+    <h3>Update Transaction</h3>
+</div>
+
+@if (trxModel == null)
+{
+    <div class="text-center">
+        <Spinner />
+    </div>
+}
+else
+{
+
+    <EditForm Model="trxModel" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+        <DataAnnotationsValidator />
+        <div class="mb-3">
+            <label class="form-label">Type</label>
+            <InputSelect class="form-select" @bind-Value="SelectedType">
+                <option value="Outcome">Outcome</option>
+                <option value="Income">Income</option>
+            </InputSelect>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <InputText id="description" class="form-control" @bind-Value="trxModel.Description" />
+        </div>
+        <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <InputNumber id="amount" class="form-control" @bind-Value="trxModel.Amount" />
+        </div>
+        <div class="mb-3">
+            <label for="date" class="form-label">Date</label>
+            <div class="d-flex gap-2">
+                <InputDate id="date" class="form-control" @bind-Value="trxModel.Date" />
+                <TimeInput TValue="TimeOnly?" @bind-Value="@time" />
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(selectedType))
+        {
+            <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <Dropdown Color="DropdownColor.None" class="form-control p-0">
+                    <DropdownToggleButton Class="text-start">
+                        @(trxModel.Category ?? "Select Category")
+                    </DropdownToggleButton>
+                    <DropdownMenu>
+                        @foreach (var cat in filteredCategories)
+                        {
+                            <DropdownItem @onclick="() => SelectCategory(cat.Name)">
+                                <i class="@cat.Icon" style="width:20px; display:inline-block; text-align:center;"></i> &nbsp;
+                                <span class="text-end"> @cat.Name</span>
+                            </DropdownItem>
+                        }
+                    </DropdownMenu>
+                </Dropdown>
+            </div>
+        }
+        <div class="d-flex justify-content-end gap-2">
+            <Button Color="ButtonColor.Secondary" @onclick="GoBack">Cancel</Button>
+            <Button Color="ButtonColor.Primary" @onclick="HandleSubmit" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <div>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Updating...
+                    </div>
+                }
+                else
+                {
+                    <text>Update</text>
+                }
+            </Button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private TransactionUpdateDTO trxModel = new();
+    private List<Category> incomeCategories = new();
+    private List<Category> outcomeCategories = new();
+    private List<Category> filteredCategories = new();
+    private Toaster? toaster;
+    private string selectedType = "Outcome";
+    private bool isLoading = false;
+    private TimeOnly? time;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var json = await Http.GetStringAsync("data/Categories.json");
+        var doc = JsonDocument.Parse(json);
+
+        outcomeCategories = doc.RootElement.GetProperty("Outcome")
+            .EnumerateArray()
+            .Select(e => new Category
+            {
+                Name = e.GetProperty("Name").GetString(),
+                Icon = e.GetProperty("Icon").GetString()
+            })
+            .ToList();
+
+        incomeCategories = doc.RootElement.GetProperty("Income")
+            .EnumerateArray()
+            .Select(e => new Category
+            {
+                Name = e.GetProperty("Name").GetString(),
+                Icon = e.GetProperty("Icon").GetString()
+            })
+            .ToList();
+
+        var transaction = await TransactionService.GetTransactionByIdAsync(Id);
+        if (transaction != null)
+        {
+            trxModel = new TransactionUpdateDTO
+            {
+				Id = transaction.Id,
+				UserId = transaction.UserId,
+                Description = transaction.Description,
+                Category = transaction.Category,
+                Amount = transaction.Amount,
+                Type = transaction.Type ?? "Outcome",
+                Date = transaction.Date
+            };
+            selectedType = trxModel.Type;
+            time = TimeOnly.FromDateTime(trxModel.Date);
+            filteredCategories = selectedType == "Outcome" ? outcomeCategories : incomeCategories;
+        }
+        else
+        {
+            Navigation.NavigateTo("/transactions");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        if (trxModel.Date != default && time.HasValue)
+        {
+            trxModel.Date = trxModel.Date.Date
+                .AddHours(time.Value.Hour)
+                .AddMinutes(time.Value.Minute)
+                .AddSeconds(time.Value.Second);
+        }
+
+        trxModel.Type = selectedType;
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(trxModel));
+		var result = await TransactionService.UpdateTransactionAsync(trxModel);
+        if (result != null)
+        {
+            toaster?.ShowMessage(ToastType.Success, "Transaction updated successfully.");
+            Navigation.NavigateTo("/transactions");
+        }
+        else
+        {
+            toaster?.ShowMessage(ToastType.Danger, "Failed to update transaction. Please try again.");
+		}
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void HandleInvalidSubmit(EditContext args)
+    {
+        toaster?.ShowMessage(ToastType.Danger, "Invalid input. Please check your data.");
+    }
+
+    private string SelectedType
+    {
+        get => selectedType;
+        set
+        {
+            if (selectedType != value)
+            {
+                selectedType = value;
+                trxModel.Category = null;
+                filteredCategories = selectedType == "Outcome" ? outcomeCategories
+                                    : selectedType == "Income" ? incomeCategories
+                                    : new List<Category>();
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void SelectCategory(string categoryName)
+    {
+        trxModel.Category = categoryName;
+        StateHasChanged();
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/transactions");
+    }
+}

@@ -17,6 +17,9 @@ namespace ExpenseTrackerNet.Shared.Models
         [Range(1, int.MaxValue, ErrorMessage = "Amount must be greater than 0")]
         public int Amount { get; set; }
 
+        [Required(ErrorMessage = "Type is required")]
+        public string Type { get; set; } = "Income";
+
         [Required]
         public DateTime Date { get; set; } = DateTime.Now;
     }
@@ -39,6 +42,9 @@ namespace ExpenseTrackerNet.Shared.Models
         [Range(1, int.MaxValue, ErrorMessage = "Amount must be greater than 0")]
         public int Amount { get; set; }
 
+        [Required(ErrorMessage = "Type is required")]
+        public string Type { get; set; } = "Income";
+
         public DateTime Date { get; set; } = DateTime.Now;
     }
 
@@ -49,6 +55,7 @@ namespace ExpenseTrackerNet.Shared.Models
         public string? Category { get; set; }
         public string Description { get; set; } = string.Empty;
         public int Amount { get; set; }
+        public string? Type { get; set; }
         public DateTime Date { get; set; }
     }
 }
