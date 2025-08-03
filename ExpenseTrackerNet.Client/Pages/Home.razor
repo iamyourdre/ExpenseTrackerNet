@@ -1,5 +1,22 @@
 ﻿@page "/"  
 @inherits AuthGuardHeader
 
-<PageTitle>Home</PageTitle>  
-<h1>Hello, world!</h1>
+@inject ExpenseTrackerNet.Client.Services.IAnalyticService AnalyticService
+@inject IJSRuntime JS
+
+<PageTitle>Home</PageTitle>
+
+<Toaster @ref="toaster" />
+<div class="d-flex justify-content-between mb-4">
+    <h3>Dashboard</h3>
+</div>
+
+@code {
+    private Toaster? toaster;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var analytics = await AnalyticService.GetAnalyticsAsync();
+        await JS.InvokeVoidAsync("console.log", analytics);
+    }
+}
