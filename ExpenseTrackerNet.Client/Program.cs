@@ -8,12 +8,12 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddBlazorBootstrap();
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IRegisterService, RegisterService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IAnalyticService, AnalyticService>();
-builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped(sp => new HttpClient
 {

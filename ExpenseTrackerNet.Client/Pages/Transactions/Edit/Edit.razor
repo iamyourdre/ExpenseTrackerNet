@@ -1,4 +1,5 @@
 ﻿@page "/transactions/edit/{Id}"
+@inherits AuthGuardHeader
 @using ExpenseTrackerNet.Client.Services
 @using ExpenseTrackerNet.Shared.Models
 @using System.Text.Json
@@ -99,6 +100,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        if (!await EnsureAuthenticatedAsync())
+            return;
+
         var json = await Http.GetStringAsync("data/Categories.json");
         var doc = JsonDocument.Parse(json);
 

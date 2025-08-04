@@ -2,61 +2,75 @@
   "Outcome": [
     {
       "Name": "Food",
-      "Icon": "fas fa-utensils"
+      "Icon": "fas fa-utensils",
+      "Color": "#FF6347"
     },
     {
       "Name": "Transport",
-      "Icon": "fas fa-car"
+      "Icon": "fas fa-car",
+      "Color": "#4682B4"
     },
     {
       "Name": "Entertainment",
-      "Icon": "fas fa-film"
+      "Icon": "fas fa-film",
+      "Color": "#FFD700"
     },
     {
       "Name": "Health",
-      "Icon": "fas fa-heart"
+      "Icon": "fas fa-heart",
+      "Color": "#32CD32"
     },
     {
       "Name": "Utilities",
-      "Icon": "fas fa-lightbulb"
+      "Icon": "fas fa-lightbulb",
+      "Color": "#FF8C00"
     },
     {
       "Name": "Shopping",
-      "Icon": "fas fa-shopping-cart"
+      "Icon": "fas fa-shopping-cart",
+      "Color": "#FF69B4"
     },
     {
       "Name": "Travel",
-      "Icon": "fas fa-plane"
+      "Icon": "fas fa-plane",
+      "Color": "#8A2BE2"
     },
     {
       "Name": "Education",
-      "Icon": "fas fa-graduation-cap"
+      "Icon": "fas fa-graduation-cap",
+      "Color": "#20B2AA"
     },
     {
       "Name": "Other",
-      "Icon": "fas fa-ellipsis-h"
+      "Icon": "fas fa-ellipsis-h",
+      "Color": "#808080"
     }
   ],
   "Income": [
     {
       "Name": "Salary",
-      "Icon": "fas fa-money-bill-wave"
+      "Icon": "fas fa-money-bill-wave",
+      "Color": "#4CAF50"
     },
     {
       "Name": "Investment",
-      "Icon": "fas fa-chart-line"
+      "Icon": "fas fa-chart-line",
+      "Color": "#FF9800"
     },
     {
       "Name": "Freelance",
-      "Icon": "fas fa-briefcase"
+      "Icon": "fas fa-briefcase",
+      "Color": "#2196F3"
     },
     {
       "Name": "Gift",
-      "Icon": "fas fa-gift"
+      "Icon": "fas fa-gift",
+      "Color": "#9C27B0"
     },
     {
       "Name": "Other",
-      "Icon": "fas fa-ellipsis-h"
+      "Icon": "fas fa-ellipsis-h",
+      "Color": "#808080"
     }
   ]
 }

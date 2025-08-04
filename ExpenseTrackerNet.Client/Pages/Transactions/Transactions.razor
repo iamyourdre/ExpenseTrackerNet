@@ -1,8 +1,8 @@
 ﻿@page "/transactions"  
+@inherits AuthGuardHeader
 @using ExpenseTrackerNet.Client.Services
 @using ExpenseTrackerNet.Shared.Models  
 @using System.Text.Json
-@inherits AuthGuardHeader  
 @inject HttpClient Http  
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage  
 @inject ITransactionService TransactionService
@@ -33,7 +33,7 @@
                     <tr>  
                         <td>
                             @{var iconClass = categories?.FirstOrDefault(c => c.Name == t.Category)?.Icon;}
-                            <span class="badge me-1 rounded-circle @(t.Type == "Outcome" ? "text-bg-danger" : "text-bg-success")" style="width: 32px; height: 32px; display:inline-block; text-align:center; line-height:25px;">
+                            <span class="badge me-1 rounded-circle" style="width: 32px; height: 32px; display:inline-block; text-align:center; line-height:25px; background-color: @categories?.FirstOrDefault(c => c.Name == t.Category)?.Color">
                                 <i class="@(string.IsNullOrEmpty(iconClass) ? "fas fa-ellipsis-h" : iconClass)"></i>
                             </span>
                             @t.Category
@@ -89,13 +89,19 @@
     private IJSRuntime JSRuntime { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
-    {  
+    {
+        if (!await EnsureAuthenticatedAsync())
+            return;
         try
         {
-            // Load transactions
             transactions = await TransactionService.GetUserTransactionsAsync();
+            if (transactions != null)
+            {
+                transactions = transactions
+                    .OrderByDescending(t => t.Date)
+                    .ToList();
+            }
 
-            // Load categories from JSON
             var json = await Http.GetStringAsync("data/Categories.json");
             using var doc = JsonDocument.Parse(json);
 
@@ -105,7 +111,8 @@
                 .Select(e => new Category
                 {
                     Name = e.GetProperty("Name").GetString(),
-                    Icon = e.GetProperty("Icon").GetString()
+                    Icon = e.GetProperty("Icon").GetString(),
+                    Color = e.GetProperty("Color").GetString()
                 })
                 .ToList();
         }
@@ -123,7 +130,10 @@
     private void HandleTransactionAdded(TransactionReadDTO newTransaction)
     {
         transactions ??= new List<TransactionReadDTO>();
-        transactions.Insert(0, newTransaction); // Add to top of list
+        transactions.Add(newTransaction);
+        transactions = transactions
+            .OrderByDescending(t => t.Date)
+            .ToList();
         StateHasChanged();
     }
 

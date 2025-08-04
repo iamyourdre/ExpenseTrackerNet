@@ -24,14 +24,17 @@ public class AuthService : BaseService, IAuthService
 
         if (string.IsNullOrWhiteSpace(accessToken) || string.IsNullOrWhiteSpace(refreshToken))
         {
+            Console.WriteLine("No tokens found in storage.");
             return false;
         }
 
         if (IsTokenValid(accessToken))
         {
+            Console.WriteLine("Access token is valid.");
             return true;
         }
 
+        Console.WriteLine("Access token is invalid, checking refresh token...");
         return await TryRefreshTokenAsync(refreshToken);
     }
 

@@ -1,0 +1,90 @@
+﻿@using BlazorBootstrap
+@using ExpenseTrackerNet.Client.Services
+@using System.Text.Json
+
+<div class="card shadow-sm p-4">
+    <h5>Total Expense</h5>
+    <div class="row g-4 mt-1">
+        <div class="col-12 col-md-6">
+            <PieChart @ref="pieChart" Width="500" WidthUnit="Unit.Px - 500" />
+        </div>
+        <div class="col-12 col-md-6">
+            <ul class="list-unstyled">
+                @foreach (var kvp in TotalExpense)
+                {
+                    var category = kvp.Key;
+                    var dto = kvp.Value;
+                    var color = CategoryColors.TryGetValue(category, out var c) ? c : "#888";
+                    <li class="d-flex align-items-center mb-2">
+                        <span style="width:18px;height:18px;display:inline-block;border-radius:3px;background:@color;margin-right:10px;"></span>
+                        <span class="fw-bold">@category</span>
+                        <span class="ms-2">(@($"Rp{dto.Amount.ToString("N0")}"))</span>
+                        <span class="ms-auto text-muted">@dto.Percentage.ToString("0.##")%</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Dictionary<string, CategoryExpenseDTO> TotalExpense { get; set; } = new();
+
+    private PieChart pieChart = default!;
+    private PieChartOptions pieChartOptions = default!;
+    private ChartData chartData = default!;
+
+    private Dictionary<string, string> CategoryColors = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var http = new HttpClient { BaseAddress = new Uri(NavigationManager.BaseUri) };
+        var json = await http.GetStringAsync("data/Categories.json");
+        var doc = JsonDocument.Parse(json);
+
+        var outcome = doc.RootElement.GetProperty("Outcome");
+        foreach (var cat in outcome.EnumerateArray())
+        {
+            var name = cat.GetProperty("Name").GetString();
+            var color = cat.GetProperty("Color").GetString();
+            if (name != null && color != null)
+                CategoryColors[name] = color;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (TotalExpense != null && TotalExpense.Count > 0 && pieChart != null && CategoryColors.Count > 0)
+        {
+            var labels = TotalExpense.Keys.ToList();
+            var data = TotalExpense.Values.Select(v => (double?)v.Amount).ToList();
+            var backgroundColors = labels.Select(label =>
+                CategoryColors.TryGetValue(label, out var color) ? color : "#888"
+            ).ToList();
+
+            chartData = new ChartData
+            {
+                Labels = labels,
+                Datasets = new List<IChartDataset>
+                {
+                    new PieChartDataset
+                    {
+                        Label = "Expense by Category",
+                        Data = data,
+                        BackgroundColor = backgroundColors
+                    }
+                }
+            };
+
+            pieChartOptions = new PieChartOptions();
+            pieChartOptions.Responsive = true;
+            pieChartOptions.Plugins.Title!.Text = "Expense by Category";
+            pieChartOptions.Plugins.Legend!.Display = false;
+
+            await pieChart.InitializeAsync(chartData, pieChartOptions);
+        }
+    }
+
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+}

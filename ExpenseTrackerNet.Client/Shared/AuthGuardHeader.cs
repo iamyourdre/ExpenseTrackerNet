@@ -6,11 +6,14 @@ public class AuthGuardHeader : ComponentBase
     [Inject] protected IAuthService AuthService { get; set; }
     [Inject] protected NavigationManager NavigationManager { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected async Task<bool> EnsureAuthenticatedAsync()
     {
-        if (!await AuthService.IsAuthAsync())
+        var isAuthenticated = await AuthService.IsAuthAsync();
+        if (!isAuthenticated)
         {
-            NavigationManager.NavigateTo("/login");
+            NavigationManager.NavigateTo("/login", true);
+            return false;
         }
+        return true;
     }
 }
