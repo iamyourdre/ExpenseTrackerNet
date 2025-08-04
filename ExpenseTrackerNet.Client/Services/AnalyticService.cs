@@ -104,7 +104,6 @@ public class AnalyticService : BaseService, IAnalyticService
             if (!expenseByCategory.ContainsKey(category))
                 expenseByCategory[category] = 0;
             expenseByCategory[category] += tx.Amount;
-            Console.WriteLine($"Category: {category}, Amount: {tx.Amount}");
         }
 
         var result = new Dictionary<string, CategoryExpenseDTO>();
@@ -116,7 +115,6 @@ public class AnalyticService : BaseService, IAnalyticService
                 Amount = kvp.Value,
                 Percentage = Math.Round(percent, 2)
             };
-            Console.WriteLine($"Category: {kvp.Key}, Amount: {kvp.Value}, Percentage: {percent}%");
         }
 
         return result;

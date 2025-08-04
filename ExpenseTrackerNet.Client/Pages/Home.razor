@@ -1,22 +1,43 @@
 ﻿@page "/"  
-@inherits AuthGuardHeader
+@using ExpenseTrackerNet.Client.Services  
+@inherits AuthGuardHeader  
 
-@inject ExpenseTrackerNet.Client.Services.IAnalyticService AnalyticService
-@inject IJSRuntime JS
+@inject ExpenseTrackerNet.Client.Services.IAnalyticService AnalyticService  
+@inject IJSRuntime JS  
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Home</PageTitle>  
 
-<Toaster @ref="toaster" />
-<div class="d-flex justify-content-between mb-4">
-    <h3>Dashboard</h3>
-</div>
+<Toaster @ref="toaster" />  
+<div class="d-flex justify-content-between mb-4">  
+    <h3>Dashboard</h3>  
+</div>  
+
+<div>  
+    <DashboardCard income="@analyticResult.TotalIncome" expense="@analyticResult.TotalExpense" totalTrx="@analyticResult.TransactionCount" isLoading="@isLoading" />
+</div>  
 
 @code {
-    private Toaster? toaster;
+    private Toaster? toaster;  
+    private AnalyticResultDTO analyticResult = new();
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        var analytics = await AnalyticService.GetAnalyticsAsync();
-        await JS.InvokeVoidAsync("console.log", analytics);
-    }
+        try
+        {
+
+            analyticResult = await AnalyticService.GetAnalyticsAsync();
+            isLoading = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            toaster?.ShowMessage(ToastType.Danger, "Failed to load analytics data.");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }  
 }

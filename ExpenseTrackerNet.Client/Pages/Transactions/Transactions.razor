@@ -42,8 +42,8 @@
                         <td class="@(t.Type == "Outcome" ? "text-danger" : "text-success")">
                             <b>
                                 @(t.Type == "Outcome"
-                                    ? "-" + t.Amount.ToString("N0")
-                                    : t.Amount.ToString("N0")
+                                    ? "-Rp" + t.Amount.ToString("N0")
+                                    : "Rp" + t.Amount.ToString("N0")
                                 )
                             </b>
                         </td>
@@ -111,7 +111,7 @@
         }
         catch (Exception ex)
         {
-            // Handle error
+            toaster?.ShowMessage(ToastType.Danger, "Failed to load transaction.");
         }
         finally
         {
