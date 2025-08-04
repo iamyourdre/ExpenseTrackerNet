@@ -12,8 +12,16 @@
     <h3>Dashboard</h3>  
 </div>  
 
-<div>  
+<div class="d-flex flex-column gap-4">
     <DashboardCard income="@analyticResult.TotalIncome" expense="@analyticResult.TotalExpense" totalTrx="@analyticResult.TransactionCount" isLoading="@isLoading" />
+    <div class="row g-4">
+        <div class="col-12 col-md-6">
+            <BalanceChart last6month="@analyticResult?.Last6MonthsBalance" />
+        </div>
+        <div class="col-12 col-md-6">
+            <IncomeExpenseChart income="@analyticResult?.Last6MonthsIncome" expense="@analyticResult?.Last6MonthsExpense" />
+        </div>
+    </div>
 </div>  
 
 @code {
@@ -25,7 +33,6 @@
     {
         try
         {
-
             analyticResult = await AnalyticService.GetAnalyticsAsync();
             isLoading = false;
             StateHasChanged();

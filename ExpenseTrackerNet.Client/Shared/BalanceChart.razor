@@ -1,0 +1,47 @@
+﻿<div class="card shadow-sm p-4">
+    <p>Account - Balance</p>
+    <LineChart @ref="lineChart" Height="300" Width="500" WidthUnit="Unit.Px - 500" />
+</div>
+
+@code {
+    [Parameter]
+    public Dictionary<string, int> last6month { get; set; } = new();
+
+    private LineChart lineChart = default!;
+    private LineChartOptions lineChartOptions = new();
+    private ChartData chartData = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (last6month != null && last6month.Count > 0 && lineChart != null)
+        {
+            var labels = last6month.Keys.ToList();
+            var data = last6month.Values.Select(v => (double?)v).ToList();
+
+            chartData = new ChartData
+            {
+                Labels = labels,
+                Datasets = new List<IChartDataset>
+                {
+                    new LineChartDataset
+                    {
+                        Label = "Balance",
+                        Data = data,
+                        BackgroundColor = "rgba(54, 162, 235, 0.2)",
+                        BorderColor = "rgba(54, 162, 235, 1)",
+                        PointRadius = new List<double> { 5 },
+                        PointHoverRadius = new List<double> { 8 }
+                    }
+                }
+            };
+
+            lineChartOptions = new LineChartOptions
+            {
+                IndexAxis = "x",
+                Responsive = true
+            };
+
+            await lineChart.InitializeAsync(chartData, lineChartOptions);
+        }
+    }
+}

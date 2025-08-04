@@ -16,8 +16,9 @@ public class AnalyticResultDTO
     public int Balance { get; set; }
     public int TransactionCount { get; set; }
     public Dictionary<string, CategoryExpenseDTO> ExpenseByCategory { get; set; } = new();
-    public int Last7DaysBalance { get; set; }
-    public int Last7DaysIncomeExpenseDiff { get; set; }
+    public Dictionary<string, int> Last6MonthsBalance { get; set; } = new();
+    public Dictionary<string, int> Last6MonthsIncome { get; set; } = new();
+    public Dictionary<string, int> Last6MonthsExpense { get; set; } = new();
 }
 
 public class CategoryExpenseDTO
@@ -46,27 +47,28 @@ public class AnalyticService : BaseService, IAnalyticService
         if (transactions == null || transactions.Count == 0)
             return null;
 
-        //await _js.InvokeVoidAsync("console.log", transactions.Select(t => new { t.Type, t.Category, t.Amount }));
-
         var totalIncome = CalculateTotalIncome(transactions);
         var totalExpense = CalculateTotalExpense(transactions);
         var balance = CalculateBalance(transactions);
         var transactionCount = transactions.Count;
         var expenseByCategory = CalculateExpenseByCategory(transactions, totalExpense);
-        var last7DaysBalance = CalculateLast7DaysBalance(transactions);
-        var last7DaysIncomeExpenseDiff = CalculateLast7DaysIncomeExpenseDiff(transactions);
+        var last6MonthsBalance = CalculateLast6MonthsMonthlyBalance(transactions);
+        var last6MonthsIncome = CalculateLast6MonthsMonthlyIncome(transactions);
+        var last6MonthsExpense = CalculateLast6MonthsMonthlyExpense(transactions);
 
-        return new AnalyticResultDTO
+        var result = new AnalyticResultDTO
         {
             TotalIncome = totalIncome,
             TotalExpense = totalExpense,
             Balance = balance,
             TransactionCount = transactionCount,
             ExpenseByCategory = expenseByCategory,
-            Last7DaysBalance = last7DaysBalance,
-            Last7DaysIncomeExpenseDiff = last7DaysIncomeExpenseDiff
+            Last6MonthsBalance = last6MonthsBalance,
+            Last6MonthsIncome = last6MonthsIncome,
+            Last6MonthsExpense = last6MonthsExpense
         };
-
+        _js.InvokeVoidAsync("console.log", result);
+        return result;
     }
 
     private int CalculateTotalIncome(List<TransactionReadDTO> transactions) =>
@@ -120,31 +122,59 @@ public class AnalyticService : BaseService, IAnalyticService
         return result;
     }
 
-    private int CalculateLast7DaysBalance(List<TransactionReadDTO> transactions)
+    private Dictionary<string, int> CalculateLast6MonthsMonthlyBalance(List<TransactionReadDTO> transactions)
     {
-        var last7Days = DateTime.Now.AddDays(-6).Date;
-        int balance = 0;
-        foreach (var tx in transactions.Where(tx => tx.Date.Date >= last7Days))
+        var dict = new Dictionary<string, int>();
+        var now = DateTime.Now;
+        for (int i = 5; i >= 0; i--)
         {
-            if (tx.Type?.Equals("Income", StringComparison.OrdinalIgnoreCase) == true)
-                balance += tx.Amount;
-            else
-                balance -= tx.Amount;
+            var month = now.AddMonths(-i);
+            var monthKey = month.ToString("yyyy-MM");
+            var monthTransactions = transactions.Where(tx => tx.Date.Year == month.Year && tx.Date.Month == month.Month);
+            int balance = 0;
+            foreach (var tx in monthTransactions)
+            {
+                if (tx.Type?.Equals("Income", StringComparison.OrdinalIgnoreCase) == true)
+                    balance += tx.Amount;
+                else
+                    balance -= tx.Amount;
+            }
+            dict[monthKey] = balance;
         }
-        return balance;
+        return dict;
     }
 
-    private int CalculateLast7DaysIncomeExpenseDiff(List<TransactionReadDTO> transactions)
+    private Dictionary<string, int> CalculateLast6MonthsMonthlyIncome(List<TransactionReadDTO> transactions)
     {
-        var last7Days = DateTime.Now.AddDays(-6).Date;
-        int income = 0, expense = 0;
-        foreach (var tx in transactions.Where(tx => tx.Date.Date >= last7Days))
+        var dict = new Dictionary<string, int>();
+        var now = DateTime.Now;
+        for (int i = 5; i >= 0; i--)
         {
-            if (tx.Type?.Equals("Income", StringComparison.OrdinalIgnoreCase) == true)
-                income += tx.Amount;
-            else
-                expense += tx.Amount;
+            var month = now.AddMonths(-i);
+            var monthKey = month.ToString("yyyy-MM");
+            var monthTransactions = transactions.Where(tx => tx.Date.Year == month.Year && tx.Date.Month == month.Month);
+            int income = monthTransactions
+                .Where(tx => tx.Type?.Equals("Income", StringComparison.OrdinalIgnoreCase) == true)
+                .Sum(tx => tx.Amount);
+            dict[monthKey] = income;
         }
-        return income - expense;
+        return dict;
+    }
+
+    private Dictionary<string, int> CalculateLast6MonthsMonthlyExpense(List<TransactionReadDTO> transactions)
+    {
+        var dict = new Dictionary<string, int>();
+        var now = DateTime.Now;
+        for (int i = 5; i >= 0; i--)
+        {
+            var month = now.AddMonths(-i);
+            var monthKey = month.ToString("yyyy-MM");
+            var monthTransactions = transactions.Where(tx => tx.Date.Year == month.Year && tx.Date.Month == month.Month);
+            int expense = monthTransactions
+                .Where(tx => !tx.Type?.Equals("Income", StringComparison.OrdinalIgnoreCase) == true)
+                .Sum(tx => tx.Amount);
+            dict[monthKey] = expense;
+        }
+        return dict;
     }
 }

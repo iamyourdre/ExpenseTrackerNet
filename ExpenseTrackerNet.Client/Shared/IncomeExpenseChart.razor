@@ -1,0 +1,61 @@
+﻿@using BlazorBootstrap
+
+<div class="card shadow-sm p-4">
+    <p>Income | Expense</p>
+    <BarChart @ref="barChart" Height="300" Width="500" WidthUnit="Unit.Px - 500" />
+</div>
+
+@code {
+    [Parameter]
+    public Dictionary<string, int> income { get; set; } = new();
+    [Parameter]
+    public Dictionary<string, int> expense { get; set; } = new();
+
+    private BarChart barChart = default!;
+    private BarChartOptions barChartOptions = new();
+    private ChartData chartData = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (income != null && expense != null && (income.Count > 0 || expense.Count > 0) && barChart != null)
+        {
+            // Get all unique months from both dictionaries, sorted
+            var months = income.Keys.Union(expense.Keys).OrderBy(m => m).ToList();
+
+            var incomeData = months.Select(m => income.ContainsKey(m) ? (double?)income[m] : 0).ToList();
+            var expenseData = months.Select(m => expense.ContainsKey(m) ? (double?)expense[m] : 0).ToList();
+
+            chartData = new ChartData
+            {
+                Labels = months,
+                Datasets = new List<IChartDataset>
+                {
+                    new BarChartDataset
+                    {
+                        Label = "Income",
+                        Data = incomeData,
+                        BackgroundColor = new List<string> { "rgba(75, 192, 192, 0.7)" },
+                        BorderColor = new List<string> { "rgba(75, 192, 192, 1)" },
+                        BorderWidth = new List<double> { 1 }
+                    },
+                    new BarChartDataset
+                    {
+                        Label = "Expense",
+                        Data = expenseData,
+                        BackgroundColor = new List<string> { "rgba(255, 99, 132, 0.7)" },
+                        BorderColor = new List<string> { "rgba(255, 99, 132, 1)" },
+                        BorderWidth = new List<double> { 1 }
+                    }
+                }
+            };
+
+            barChartOptions = new BarChartOptions
+            {
+                Responsive = true,
+                IndexAxis = "x"
+            };
+
+            await barChart.InitializeAsync(chartData, barChartOptions);
+        }
+    }
+}
